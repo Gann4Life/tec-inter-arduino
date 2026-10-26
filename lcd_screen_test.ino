@@ -3,12 +3,13 @@
   Ver DESIGN.md para las reglas del juego.
 
   Conexiones (Arduino Uno/Nano):
-    LCD I2C   VCC -> 5V, GND -> GND, SDA -> A4, SCL -> A5
-    Boton 1   D2  -> GND   (elegir letra)
-    Boton 2   D3  -> GND   (confirmar letra)
-    LED rojo  D6  -> resistencia 220 ohm -> GND
-    LED verde D7  -> resistencia 220 ohm -> GND
-    HC-SR04   TRIG -> D9, ECHO -> D10, VCC -> 5V, GND -> GND
+    LCD I2C    VCC -> 5V, GND -> GND, SDA -> A4, SCL -> A5
+    Boton 1    D2  -> GND   (letra anterior)
+    Boton 2    D3  -> GND   (letra siguiente)
+    Boton 3    D4  -> GND   (confirmar letra)
+    LED rojo   D6  -> resistencia 220 ohm -> GND
+    LED verde  D7  -> resistencia 220 ohm -> GND
+    HC-SR04    TRIG -> D9, ECHO -> D10, VCC -> 5V, GND -> GND
 
   Libreria: LiquidCrystal_I2C de Frank de Brabander.
   Si la pantalla queda en blanco, corre i2c_scanner/ y ajusta la direccion.
@@ -20,8 +21,9 @@
 LiquidCrystal_I2C lcd(0x27, 16, 2);  // cambia 0x27 por 0x3F si hace falta
 
 // ---------------- Pines ----------------
-const uint8_t PIN_BOTON_LETRA = 2;
-const uint8_t PIN_BOTON_OK = 3;
+const uint8_t PIN_BOTON_ANTERIOR = 2;
+const uint8_t PIN_BOTON_SIGUIENTE = 3;
+const uint8_t PIN_BOTON_OK = 4;
 const uint8_t PIN_LED_ROJO = 6;
 const uint8_t PIN_LED_VERDE = 7;
 const uint8_t PIN_TRIG = 9;
@@ -55,9 +57,11 @@ bool letrasUsadas[26];
 uint8_t letraActual = 0;
 uint8_t vidas = VIDAS_INICIALES;
 
-bool botonLetraAnterior = HIGH;
-bool botonOkAnterior = HIGH;
-unsigned long ultimoBotonLetra = 0;
+bool botonAnteriorEstado = HIGH;
+bool botonSiguienteEstado = HIGH;
+bool botonOkEstado = HIGH;
+unsigned long ultimoBotonAnterior = 0;
+unsigned long ultimoBotonSiguiente = 0;
 unsigned long ultimoBotonOk = 0;
 
 unsigned long verdeHasta = 0;
@@ -233,7 +237,8 @@ void actualizarLeds() {
 
 // ---------------- Inicio ----------------
 void setup() {
-  pinMode(PIN_BOTON_LETRA, INPUT_PULLUP);
+  pinMode(PIN_BOTON_ANTERIOR, INPUT_PULLUP);
+  pinMode(PIN_BOTON_SIGUIENTE, INPUT_PULLUP);
   pinMode(PIN_BOTON_OK, INPUT_PULLUP);
   pinMode(PIN_LED_ROJO, OUTPUT);
   pinMode(PIN_LED_VERDE, OUTPUT);
@@ -260,11 +265,15 @@ void loop() {
 
   switch (estado) {
     case JUGANDO:
-      if (leerBoton(PIN_BOTON_LETRA, botonLetraAnterior, ultimoBotonLetra)) {
-        letraActual = (letraActual + 1) % 26;
+      if (leerBoton(PIN_BOTON_ANTERIOR, botonAnteriorEstado, ultimoBotonAnterior)) {
+        letraActual = (letraActual + 25) % 26;  // retrocede, con vuelta de A a Z
         mostrarSeleccion();
       }
-      if (leerBoton(PIN_BOTON_OK, botonOkAnterior, ultimoBotonOk)) {
+      if (leerBoton(PIN_BOTON_SIGUIENTE, botonSiguienteEstado, ultimoBotonSiguiente)) {
+        letraActual = (letraActual + 1) % 26;  // avanza, con vuelta de Z a A
+        mostrarSeleccion();
+      }
+      if (leerBoton(PIN_BOTON_OK, botonOkEstado, ultimoBotonOk)) {
         confirmarLetra();
       }
       break;
