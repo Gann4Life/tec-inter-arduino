@@ -1,6 +1,6 @@
 # Ahorcado con Arduino
 
-Juego del ahorcado para la materia Tecnologías Interactivas. Las palabras están precargadas en el código y la partida se controla con dos botones, un sensor ultrasónico, dos LEDs y una pantalla LCD 16x2 por I2C.
+Juego del ahorcado para la materia Tecnologías Interactivas. Las palabras están precargadas en el código y la partida se controla con tres botones, un sensor ultrasónico, dos LEDs y una pantalla LCD 16x2 por I2C.
 
 Las reglas completas están en [DESIGN.md](DESIGN.md).
 
@@ -8,7 +8,7 @@ Las reglas completas están en [DESIGN.md](DESIGN.md).
 
 - Arduino Uno o Nano
 - LCD 16x2 con módulo I2C (PCF8574)
-- 2 pulsadores
+- 3 pulsadores
 - 1 LED rojo y 1 LED verde
 - 2 resistencias de 220 Ω
 - Sensor ultrasónico HC-SR04
@@ -19,8 +19,9 @@ Las reglas completas están en [DESIGN.md](DESIGN.md).
 |---|---|
 | LCD I2C — VCC / GND | 5V / GND |
 | LCD I2C — SDA / SCL | A4 / A5 |
-| Botón 1 (elegir letra) | D2 → GND |
-| Botón 2 (confirmar letra) | D3 → GND |
+| Botón 1 (letra anterior) | D2 → GND |
+| Botón 2 (letra siguiente) | D3 → GND |
+| Botón 3 (confirmar letra) | D4 → GND |
 | LED rojo (con resistencia de 220 Ω) | D6 → GND |
 | LED verde (con resistencia de 220 Ω) | D7 → GND |
 | HC-SR04 — TRIG / ECHO | D9 / D10 |
@@ -38,8 +39,8 @@ Los botones usan `INPUT_PULLUP`, por eso se conectan directamente entre el pin y
 ## Cómo se juega
 
 1. Acerca la mano al sensor ultrasónico (menos de 15 cm) para empezar.
-2. El **botón 1** avanza por las letras de la A a la Z.
-3. El **botón 2** confirma la letra elegida.
+2. El **botón 1** retrocede a la letra anterior y el **botón 2** avanza a la siguiente; el recorrido es circular, de Z vuelve a A y viceversa.
+3. El **botón 3** confirma la letra elegida.
    - Si la letra está en la palabra, el LED verde se enciende brevemente.
    - Si no está, el LED rojo parpadea 3 veces y se pierde una vida.
    - Una letra ya probada se ignora y no gasta vida.
